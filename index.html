@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Count the Dots!</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive;
+      background: linear-gradient(160deg, #a18cd1 0%, #fbc2eb 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      gap: 16px;
+      padding: 20px;
+    }
+
+    /* ── Title ── */
+    h1 {
+      color: white;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+      letter-spacing: 1px;
+    }
+
+    /* ── Streak bar ── */
+    #streak {
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      min-height: 2.2rem;
+      color: #FFD700;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
+      transition: all 0.3s;
+    }
+
+    /* ── Buddy character ── */
+    #buddy {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      transition: transform 0.15s;
+      line-height: 1;
+    }
+    #buddy.happy  { animation: buddyJump 0.5s ease-out; }
+    #buddy.sad    { animation: buddyShake 0.4s ease-in-out; }
+
+    @keyframes buddyJump {
+      0%   { transform: translateY(0) scale(1); }
+      30%  { transform: translateY(-18px) scale(1.15); }
+      60%  { transform: translateY(-8px) scale(1.05); }
+      100% { transform: translateY(0) scale(1); }
+    }
+    @keyframes buddyShake {
+      0%, 100% { transform: rotate(0deg); }
+      20%  { transform: rotate(-12deg); }
+      40%  { transform: rotate(12deg); }
+      60%  { transform: rotate(-8deg); }
+      80%  { transform: rotate(8deg); }
+    }
+
+    /* ── Dot stage ── */
+    #stage {
+      width: min(380px, 92vw);
+      height: min(260px, 42vw, 240px);
+      background: rgba(255,255,255,0.22);
+      border-radius: 28px;
+      border: 3px solid rgba(255,255,255,0.45);
+      backdrop-filter: blur(6px);
+      position: relative;
+      overflow: hidden;
+    }
+    #stage.correct-flash { animation: stageFlash 0.5s ease-out; }
+    @keyframes stageFlash {
+      0%   { background: rgba(255,255,255,0.22); }
+      40%  { background: rgba(255,255,180,0.55); }
+      100% { background: rgba(255,255,255,0.22); }
+    }
+
+    /* ── Dots ── */
+    .dot {
+      position: absolute;
+      border-radius: 50%;
+      animation: dotPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+    @keyframes dotPop {
+      0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+    }
+    .dot.wiggle { animation: dotWiggle 0.45s ease-in-out; }
+    @keyframes dotWiggle {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25%  { transform: scale(1.2) rotate(-12deg); }
+      75%  { transform: scale(1.2) rotate(12deg); }
+    }
+
+    /* ── Feedback label ── */
+    #feedback {
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      min-height: 2.4rem;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    #feedback.pop  { animation: fbPop  0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    #feedback.nope { animation: fbNope 0.4s ease-in-out; }
+    @keyframes fbPop  {
+      0%   { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+    @keyframes fbNope {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-7px); }
+      80% { transform: translateX(7px); }
+    }
+
+    /* ── Answer buttons ── */
+    #buttons {
+      display: flex;
+      gap: clamp(8px, 2.5vw, 14px);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .answer-btn {
+      width:  clamp(62px, 16vw, 82px);
+      height: clamp(62px, 16vw, 82px);
+      border-radius: 50%;
+      border: none;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      box-shadow: 0 7px 0 rgba(0,0,0,0.25);
+      transition: transform 0.08s, box-shadow 0.08s;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+    .answer-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+    }
+    .answer-btn:nth-child(1) { background: #ff6b6b; box-shadow: 0 7px 0 #c0392b; }
+    .answer-btn:nth-child(2) { background: #ff9f43; box-shadow: 0 7px 0 #d35400; }
+    .answer-btn:nth-child(3) { background: #f9ca24; color: #6c4a00; box-shadow: 0 7px 0 #b7950b; }
+    .answer-btn:nth-child(4) { background: #6bcb77; box-shadow: 0 7px 0 #27ae60; }
+    .answer-btn:nth-child(5) { background: #4d96ff; box-shadow: 0 7px 0 #1a5fa8; }
+    .answer-btn:nth-child(1):active { box-shadow: 0 2px 0 #c0392b; }
+    .answer-btn:nth-child(2):active { box-shadow: 0 2px 0 #d35400; }
+    .answer-btn:nth-child(3):active { box-shadow: 0 2px 0 #b7950b; }
+    .answer-btn:nth-child(4):active { box-shadow: 0 2px 0 #27ae60; }
+    .answer-btn:nth-child(5):active { box-shadow: 0 2px 0 #1a5fa8; }
+
+    /* ── Confetti ── */
+    .confetti-piece {
+      position: fixed;
+      top: -20px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 999;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(0)    rotate(0deg)   scaleX(1);   opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(105vh) rotate(720deg) scaleX(-1);  opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Count the Dots!</h1>
+  <div id="streak"></div>
+  <div id="buddy">🐣</div>
+  <div id="stage"></div>
+  <div id="feedback">&nbsp;</div>
+
+  <div id="buttons">
+    <button class="answer-btn" onclick="checkAnswer(1)">1</button>
+    <button class="answer-btn" onclick="checkAnswer(2)">2</button>
+    <button class="answer-btn" onclick="checkAnswer(3)">3</button>
+    <button class="answer-btn" onclick="checkAnswer(4)">4</button>
+    <button class="answer-btn" onclick="checkAnswer(5)">5</button>
+  </div>
+
+  <script>
+    // ── Audio ──────────────────────────────────────────────────────────────
+    let audioCtx = null;
+    function getCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      return audioCtx;
+    }
+    function beep(freq, startTime, dur, vol = 0.22, type = 'sine') {
+      try {
+        const ctx = getCtx();
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(vol, ctx.currentTime + startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTime + dur);
+        osc.start(ctx.currentTime + startTime);
+        osc.stop(ctx.currentTime  + startTime + dur + 0.05);
+      } catch(e) {}
+    }
+    function playCorrect() {
+      // Cheerful ascending arpeggio: C5 E5 G5 C6
+      [[523,0],[659,0.1],[784,0.2],[1047,0.32]].forEach(([f,t]) => beep(f, t, 0.28));
+    }
+    function playWrong() {
+      beep(280, 0,    0.22, 0.18);
+      beep(240, 0.18, 0.22, 0.15);
+    }
+    function playPop(index) {
+      // Small pop when each dot appears
+      beep(400 + index * 60, 0, 0.08, 0.08, 'triangle');
+    }
+
+    // ── Dot colors (vivid, toddler-friendly) ──────────────────────────────
+    const COLORS = ['#ff6b6b','#ff9f43','#f9ca24','#6bcb77','#4d96ff','#ff6fc8','#a29bfe'];
+
+    // ── Non-overlapping random positions ──────────────────────────────────
+    function makeDotPositions(n, W, H, r) {
+      const pad = r * 1.1;
+      const positions = [];
+      let attempts = 0;
+      while (positions.length < n && attempts < 2000) {
+        attempts++;
+        const x = pad + Math.random() * (W - 2 * pad);
+        const y = pad + Math.random() * (H - 2 * pad);
+        const ok = positions.every(p => {
+          const dx = p.x - x, dy = p.y - y;
+          return Math.sqrt(dx*dx + dy*dy) >= r * 2.4;
+        });
+        if (ok) positions.push({x, y});
+      }
+      return positions;
+    }
+
+    // ── Game state ─────────────────────────────────────────────────────────
+    let correctAnswer = 0;
+    let streak = 0;
+    let canAnswer = true;
+
+    const BUDDY_HAPPY = ['🐣','🐥','🐤','🌟','🦄','🎈','🐸','🦊'];
+    const BUDDY_IDLE  = ['🐣','🐥','🐤','🐰','🐻','🐼','🦁','🐯'];
+    let buddyIdx = 0;
+
+    function newRound() {
+      canAnswer = true;
+      correctAnswer = Math.ceil(Math.random() * 5);
+      renderDots(correctAnswer);
+      setFeedback('\u00a0', '');          // non-breaking space keeps height stable
+      setBuddy(BUDDY_IDLE[buddyIdx % BUDDY_IDLE.length], '');
+    }
+
+    function renderDots(n) {
+      const stage = document.getElementById('stage');
+      stage.innerHTML = '';
+      stage.classList.remove('correct-flash');
+
+      const W = stage.clientWidth  || 380;
+      const H = stage.clientHeight || 240;
+      const r = Math.min(50, Math.max(30, (Math.min(W, H) * 0.55) / n));
+
+      const positions = makeDotPositions(n, W, H, r);
+      positions.forEach((pos, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        const size = r * 2;
+        dot.style.cssText = `
+          width:  ${size}px;
+          height: ${size}px;
+          left:   ${pos.x - r}px;
+          top:    ${pos.y - r}px;
+          background: ${COLORS[i % COLORS.length]};
+          animation-delay: ${i * 0.07}s;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.22),
+                      inset 0 -4px 6px rgba(0,0,0,0.15),
+                      inset 0  4px 6px rgba(255,255,255,0.45);
+        `;
+        stage.appendChild(dot);
+        setTimeout(() => playPop(i), i * 70);
+      });
+    }
+
+    function wiggleDots() {
+      document.querySelectorAll('.dot').forEach((dot, i) => {
+        setTimeout(() => {
+          dot.classList.remove('wiggle');
+          void dot.offsetWidth; // reflow to restart animation
+          dot.classList.add('wiggle');
+        }, i * 55);
+      });
+    }
+
+    function setFeedback(text, cls) {
+      const el = document.getElementById('feedback');
+      el.className = '';
+      el.textContent = text;
+      if (cls) {
+        void el.offsetWidth;
+        el.className = cls;
+      }
+    }
+
+    function setBuddy(emoji, animClass) {
+      const el = document.getElementById('buddy');
+      el.textContent = emoji;
+      el.className = '';
+      if (animClass) {
+        void el.offsetWidth;
+        el.className = animClass;
+      }
+    }
+
+    function updateStreakDisplay() {
+      const el = document.getElementById('streak');
+      if (streak === 0) { el.textContent = ''; return; }
+      if (streak < 3)   { el.textContent = `${streak} in a row!`; return; }
+      el.textContent = '⭐'.repeat(Math.min(streak, 10));
+    }
+
+    function launchConfetti(big = false) {
+      const count  = big ? 90 : 45;
+      const colors = ['#ff6b6b','#ff9f43','#f9ca24','#6bcb77','#4d96ff','#ff6fc8','#ffffff'];
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          const el = document.createElement('div');
+          el.className = 'confetti-piece';
+          const size = 8 + Math.random() * 10;
+          el.style.cssText = `
+            left:     ${Math.random() * 100}vw;
+            width:    ${size}px;
+            height:   ${size}px;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+            animation-duration: ${1.4 + Math.random() * 1.4}s;
+            animation-delay:    ${Math.random() * 0.4}s;
+          `;
+          document.body.appendChild(el);
+          setTimeout(() => el.remove(), 3000);
+        }, Math.random() * 200);
+      }
+    }
+
+    // ── Answer handler ─────────────────────────────────────────────────────
+    function checkAnswer(num) {
+      if (!canAnswer) return;
+      canAnswer = false;
+
+      if (num === correctAnswer) {
+        streak++;
+        updateStreakDisplay();
+        buddyIdx++;
+
+        const isBigWin = streak > 0 && streak % 3 === 0;
+        const label = isBigWin ? '🎉 Amazing!!' : '✅ Yes!!';
+
+        setFeedback(label, 'pop');
+        setBuddy(BUDDY_HAPPY[buddyIdx % BUDDY_HAPPY.length], 'happy');
+        playCorrect();
+        wiggleDots();
+
+        const stage = document.getElementById('stage');
+        void stage.offsetWidth;
+        stage.classList.add('correct-flash');
+
+        if (isBigWin) launchConfetti(true);
+        else if (streak >= 2) launchConfetti(false);
+
+        setTimeout(newRound, 1600);
+      } else {
+        streak = 0;
+        updateStreakDisplay();
+        setFeedback('🔄 Try again!', 'nope');
+        setBuddy('😅', 'sad');
+        playWrong();
+        setTimeout(() => {
+          canAnswer = true;
+          setFeedback('\u00a0', '');
+          setBuddy(BUDDY_IDLE[buddyIdx % BUDDY_IDLE.length], '');
+        }, 900);
+      }
+    }
+
+    // ── Kick off ───────────────────────────────────────────────────────────
+    newRound();
+  </script>
+</body>
+</html>
