@@ -157,6 +157,34 @@
     .answer-btn:nth-child(4):active { box-shadow: 0 2px 0 #27ae60; }
     .answer-btn:nth-child(5):active { box-shadow: 0 2px 0 #1a5fa8; }
 
+    /* ── Max-dots selector ── */
+    #max-selector {
+      position: fixed;
+      bottom: 12px;
+      left: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      opacity: 0.65;
+    }
+    #max-selector label {
+      color: white;
+      font-size: 0.72rem;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    #max-dots {
+      font-family: inherit;
+      font-size: 0.8rem;
+      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.2);
+      color: white;
+      padding: 2px 4px;
+      cursor: pointer;
+      outline: none;
+    }
+    #max-dots option { color: #333; background: white; }
+
     /* ── Confetti ── */
     .confetti-piece {
       position: fixed;
@@ -187,6 +215,17 @@
     <button class="answer-btn" onclick="checkAnswer(3)">3</button>
     <button class="answer-btn" onclick="checkAnswer(4)">4</button>
     <button class="answer-btn" onclick="checkAnswer(5)">5</button>
+  </div>
+
+  <div id="max-selector">
+    <label for="max-dots">max:</label>
+    <select id="max-dots" onchange="onMaxChange()">
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+      <option>4</option>
+      <option selected>5</option>
+    </select>
   </div>
 
   <script>
@@ -254,9 +293,23 @@
     const BUDDY_IDLE  = ['🐣','🐥','🐤','🐰','🐻','🐼','🦁','🐯'];
     let buddyIdx = 0;
 
+    function getMax() {
+      return parseInt(document.getElementById('max-dots').value);
+    }
+
+    function onMaxChange() {
+      const max = getMax();
+      document.querySelectorAll('.answer-btn').forEach((btn, i) => {
+        btn.style.display = (i + 1) <= max ? '' : 'none';
+      });
+      streak = 0;
+      updateStreakDisplay();
+      newRound();
+    }
+
     function newRound() {
       canAnswer = true;
-      correctAnswer = Math.ceil(Math.random() * 5);
+      correctAnswer = Math.ceil(Math.random() * getMax());
       renderDots(correctAnswer);
       setFeedback('\u00a0', '');          // non-breaking space keeps height stable
       setBuddy(BUDDY_IDLE[buddyIdx % BUDDY_IDLE.length], '');
