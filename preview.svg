@@ -1,0 +1,100 @@
+<svg width="800" height="440" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a18cd1"/>
+      <stop offset="100%" stop-color="#fbc2eb"/>
+    </linearGradient>
+
+    <!-- 3D highlight layer for dots -->
+    <radialGradient id="shine" cx="36%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.52)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+
+    <!-- Stage glass panel -->
+    <filter id="stage-blur" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1"/>
+    </filter>
+
+    <clipPath id="stage-clip">
+      <rect x="118" y="148" width="564" height="186" rx="26"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="440" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="400" y="52" text-anchor="middle"
+        font-family="'Comic Sans MS', 'Chalkboard SE', cursive"
+        font-size="34" font-weight="bold" fill="white"
+        style="filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.15))">
+    Count the Dots!
+  </text>
+
+  <!-- Streak stars -->
+  <text x="400" y="88" text-anchor="middle" font-size="22">⭐⭐⭐</text>
+
+  <!-- Buddy -->
+  <text x="400" y="130" text-anchor="middle" font-size="38">🐥</text>
+
+  <!-- Stage background (glass) -->
+  <rect x="118" y="148" width="564" height="186" rx="26"
+        fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.45)" stroke-width="3"/>
+
+  <!-- ── Four dots ── -->
+
+  <!-- dot 1: red, top-left -->
+  <circle cx="222" cy="208" r="36" fill="#ff6b6b"
+          filter="drop-shadow(0 4px 6px rgba(0,0,0,0.25))"/>
+  <circle cx="222" cy="208" r="36" fill="url(#shine)"/>
+
+  <!-- dot 2: orange, top-right -->
+  <circle cx="414" cy="196" r="36" fill="#ff9f43"
+          filter="drop-shadow(0 4px 6px rgba(0,0,0,0.25))"/>
+  <circle cx="414" cy="196" r="36" fill="url(#shine)"/>
+
+  <!-- dot 3: green, bottom-left -->
+  <circle cx="310" cy="296" r="36" fill="#6bcb77"
+          filter="drop-shadow(0 4px 6px rgba(0,0,0,0.25))"/>
+  <circle cx="310" cy="296" r="36" fill="url(#shine)"/>
+
+  <!-- dot 4: blue, bottom-right -->
+  <circle cx="554" cy="276" r="36" fill="#4d96ff"
+          filter="drop-shadow(0 4px 6px rgba(0,0,0,0.25))"/>
+  <circle cx="554" cy="276" r="36" fill="url(#shine)"/>
+
+  <!-- ── Answer buttons ── -->
+
+  <!-- btn 1 -->
+  <circle cx="190" cy="390" r="34" fill="#ff6b6b"/>
+  <rect   cx="190" cy="390" x="156" y="418" width="68" height="8" rx="4" fill="#c0392b" opacity="0.7"/>
+  <text x="190" y="399" text-anchor="middle"
+        font-family="'Comic Sans MS', cursive" font-size="26" font-weight="bold" fill="white">1</text>
+
+  <!-- btn 2 -->
+  <circle cx="285" cy="390" r="34" fill="#ff9f43"/>
+  <rect   cx="285" cy="390" x="251" y="418" width="68" height="8" rx="4" fill="#d35400" opacity="0.7"/>
+  <text x="285" y="399" text-anchor="middle"
+        font-family="'Comic Sans MS', cursive" font-size="26" font-weight="bold" fill="white">2</text>
+
+  <!-- btn 3 -->
+  <circle cx="380" cy="390" r="34" fill="#f9ca24"/>
+  <rect   cx="380" cy="390" x="346" y="418" width="68" height="8" rx="4" fill="#b7950b" opacity="0.7"/>
+  <text x="380" y="399" text-anchor="middle"
+        font-family="'Comic Sans MS', cursive" font-size="26" font-weight="bold" fill="#6c4a00">3</text>
+
+  <!-- btn 4 — highlighted (correct answer) -->
+  <circle cx="475" cy="390" r="37" fill="white" opacity="0.35"/>
+  <circle cx="475" cy="390" r="34" fill="#6bcb77"/>
+  <rect   cx="475" cy="390" x="441" y="418" width="68" height="8" rx="4" fill="#27ae60" opacity="0.7"/>
+  <text x="475" y="399" text-anchor="middle"
+        font-family="'Comic Sans MS', cursive" font-size="26" font-weight="bold" fill="white">4</text>
+
+  <!-- btn 5 -->
+  <circle cx="570" cy="390" r="34" fill="#4d96ff"/>
+  <rect   cx="570" cy="390" x="536" y="418" width="68" height="8" rx="4" fill="#1a5fa8" opacity="0.7"/>
+  <text x="570" y="399" text-anchor="middle"
+        font-family="'Comic Sans MS', cursive" font-size="26" font-weight="bold" fill="white">5</text>
+
+</svg>

@@ -1,5 +1,7 @@
 # Counting Fun
 
+![preview](preview.svg)
+
 A simple browser game for toddlers learning to count. Colorful dots appear on screen and the child taps the number that matches how many they see.
 
 ## How it works
