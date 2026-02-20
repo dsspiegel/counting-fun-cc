@@ -128,34 +128,22 @@
     }
 
     .answer-btn {
-      width:  clamp(62px, 16vw, 82px);
-      height: clamp(62px, 16vw, 82px);
       border-radius: 50%;
       border: none;
-      font-size: clamp(1.6rem, 5vw, 2.2rem);
       font-family: inherit;
       font-weight: bold;
       cursor: pointer;
-      color: white;
-      box-shadow: 0 7px 0 rgba(0,0,0,0.25);
+      color: var(--btn-text, white);
+      background: var(--btn-bg);
+      box-shadow: 0 7px 0 var(--btn-shadow);
       transition: transform 0.08s, box-shadow 0.08s;
       -webkit-tap-highlight-color: transparent;
       outline: none;
     }
     .answer-btn:active {
       transform: translateY(5px);
-      box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+      box-shadow: 0 2px 0 var(--btn-shadow);
     }
-    .answer-btn:nth-child(1) { background: #ff6b6b; box-shadow: 0 7px 0 #c0392b; }
-    .answer-btn:nth-child(2) { background: #ff9f43; box-shadow: 0 7px 0 #d35400; }
-    .answer-btn:nth-child(3) { background: #f9ca24; color: #6c4a00; box-shadow: 0 7px 0 #b7950b; }
-    .answer-btn:nth-child(4) { background: #6bcb77; box-shadow: 0 7px 0 #27ae60; }
-    .answer-btn:nth-child(5) { background: #4d96ff; box-shadow: 0 7px 0 #1a5fa8; }
-    .answer-btn:nth-child(1):active { box-shadow: 0 2px 0 #c0392b; }
-    .answer-btn:nth-child(2):active { box-shadow: 0 2px 0 #d35400; }
-    .answer-btn:nth-child(3):active { box-shadow: 0 2px 0 #b7950b; }
-    .answer-btn:nth-child(4):active { box-shadow: 0 2px 0 #27ae60; }
-    .answer-btn:nth-child(5):active { box-shadow: 0 2px 0 #1a5fa8; }
 
     /* ── Max-dots selector ── */
     #max-selector {
@@ -209,23 +197,11 @@
   <div id="stage"></div>
   <div id="feedback">&nbsp;</div>
 
-  <div id="buttons">
-    <button class="answer-btn" onclick="checkAnswer(1)">1</button>
-    <button class="answer-btn" onclick="checkAnswer(2)">2</button>
-    <button class="answer-btn" onclick="checkAnswer(3)">3</button>
-    <button class="answer-btn" onclick="checkAnswer(4)">4</button>
-    <button class="answer-btn" onclick="checkAnswer(5)">5</button>
-  </div>
+  <div id="buttons"></div>
 
   <div id="max-selector">
     <label for="max-dots">max:</label>
-    <select id="max-dots" onchange="onMaxChange()">
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-      <option>4</option>
-      <option selected>5</option>
-    </select>
+    <select id="max-dots" onchange="onMaxChange()"></select>
   </div>
 
   <script>
@@ -293,15 +269,51 @@
     const BUDDY_IDLE  = ['🐣','🐥','🐤','🐰','🐻','🐼','🦁','🐯'];
     let buddyIdx = 0;
 
+    // ── Button palette (bg, shadow, optional dark text flag) ──────────────
+    const BTN_PALETTE = [
+      ['#ff6b6b','#c0392b'],
+      ['#ff9f43','#d35400'],
+      ['#f9ca24','#b7950b', '#6c4a00'],
+      ['#6bcb77','#27ae60'],
+      ['#4d96ff','#1a5fa8'],
+      ['#ff6fc8','#c0185a'],
+      ['#a29bfe','#6c5ce7'],
+      ['#55efc4','#00b894'],
+      ['#fd79a8','#e84393'],
+      ['#fdcb6e','#e17055', '#6c4a00'],
+    ];
+
     function getMax() {
       return parseInt(document.getElementById('max-dots').value);
     }
 
+    function renderButtons(max) {
+      const container = document.getElementById('buttons');
+      container.innerHTML = '';
+      // Scale button size down as count grows
+      const size   = max <= 5 ? 74 : max <= 10 ? 58 : 46;
+      const fsRem  = max <= 5 ? 2.0 : max <= 10 ? 1.5 : 1.1;
+      container.style.maxWidth = max <= 5 ? '420px' : max <= 10 ? '500px' : '560px';
+
+      for (let n = 1; n <= max; n++) {
+        const [bg, shadow, text] = BTN_PALETTE[(n - 1) % BTN_PALETTE.length];
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = n;
+        btn.style.cssText = `
+          width: ${size}px; height: ${size}px;
+          font-size: ${fsRem}rem;
+          --btn-bg: ${bg}; --btn-shadow: ${shadow};
+          ${text ? `--btn-text: ${text};` : ''}
+        `;
+        btn.addEventListener('click', () => checkAnswer(n));
+        container.appendChild(btn);
+      }
+    }
+
     function onMaxChange() {
       const max = getMax();
-      document.querySelectorAll('.answer-btn').forEach((btn, i) => {
-        btn.style.display = (i + 1) <= max ? '' : 'none';
-      });
+      renderButtons(max);
       streak = 0;
       updateStreakDisplay();
       newRound();
@@ -322,7 +334,7 @@
 
       const W = stage.clientWidth  || 380;
       const H = stage.clientHeight || 240;
-      const r = Math.min(50, Math.max(30, (Math.min(W, H) * 0.55) / n));
+      const r = Math.min(50, Math.max(14, (Math.min(W, H) * 0.55) / n));
 
       const positions = makeDotPositions(n, W, H, r);
       positions.forEach((pos, i) => {
@@ -446,7 +458,17 @@
     }
 
     // ── Kick off ───────────────────────────────────────────────────────────
-    newRound();
+    (function init() {
+      const sel = document.getElementById('max-dots');
+      for (let i = 1; i <= 20; i++) {
+        const opt = document.createElement('option');
+        opt.value = opt.textContent = i;
+        if (i === 5) opt.selected = true;
+        sel.appendChild(opt);
+      }
+      renderButtons(5);
+      newRound();
+    })();
   </script>
 </body>
 </html>
