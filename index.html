@@ -452,8 +452,7 @@
         setBuddy(BUDDY_HAPPY[buddyIdx % BUDDY_HAPPY.length], 'happy');
         playCorrect();
         wiggleDots();
-        // Speak after the arpeggio finishes (~0.6s)
-        setTimeout(() => speak(`${correctAnswer}! ${encouragement}`), 600);
+        speak(`${correctAnswer}! ${encouragement}`);
 
         const stage = document.getElementById('stage');
         void stage.offsetWidth;
