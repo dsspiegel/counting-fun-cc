@@ -293,7 +293,8 @@
       // Scale button size down as count grows
       const size   = max <= 5 ? 74 : max <= 10 ? 58 : 46;
       const fsRem  = max <= 5 ? 2.0 : max <= 10 ? 1.5 : 1.1;
-      container.style.maxWidth = max <= 5 ? '420px' : max <= 10 ? '500px' : '560px';
+      container.style.flexWrap = max <= 5 ? 'nowrap' : 'wrap';
+      container.style.maxWidth = max <= 10 ? '520px' : '560px';
 
       for (let n = 1; n <= max; n++) {
         const [bg, shadow, text] = BTN_PALETTE[(n - 1) % BTN_PALETTE.length];
