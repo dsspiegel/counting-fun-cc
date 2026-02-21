@@ -418,6 +418,22 @@
       }
     }
 
+    // ── Speech ─────────────────────────────────────────────────────────────
+    const ENCOURAGEMENTS = [
+      'Great job!', 'Amazing!', 'Fantastic!', 'You got it!',
+      'Wonderful!', 'Brilliant!', 'Way to go!', 'Awesome!',
+      'Super!', 'Well done!', 'You rock!', 'Incredible!',
+    ];
+
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate  = 0.88;
+      utt.pitch = 1.15;
+      window.speechSynthesis.speak(utt);
+    }
+
     // ── Answer handler ─────────────────────────────────────────────────────
     function checkAnswer(num) {
       if (!canAnswer) return;
@@ -429,12 +445,15 @@
         buddyIdx++;
 
         const isBigWin = streak > 0 && streak % 3 === 0;
-        const label = isBigWin ? '🎉 Amazing!!' : '✅ Yes!!';
+        const encouragement = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
+        const label = (isBigWin ? '🎉 ' : '✅ ') + encouragement;
 
         setFeedback(label, 'pop');
         setBuddy(BUDDY_HAPPY[buddyIdx % BUDDY_HAPPY.length], 'happy');
         playCorrect();
         wiggleDots();
+        // Speak after the arpeggio finishes (~0.6s)
+        setTimeout(() => speak(`${correctAnswer}! ${encouragement}`), 600);
 
         const stage = document.getElementById('stage');
         void stage.offsetWidth;
